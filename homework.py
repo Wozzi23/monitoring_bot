@@ -109,7 +109,7 @@ def main():
                 send_message(bot, status)
 
             except Exception:
-                logging.debug('Статус домашней работы не обновлен ревьюером')
+                logging.debug('Статус домашней работы не обновлен ревьюеромs')
 
             current_timestamp = int(time.time())
             time.sleep(RETRY_TIME)
