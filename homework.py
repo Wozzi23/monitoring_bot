@@ -32,8 +32,7 @@ logging.basicConfig(
 
 
 def send_message(bot, message: str) -> None:
-    """Отправка сообщения через бота в чат """
-
+    """Отправка сообщения через бота в чат."""
     bot.send_message(TELEGRAM_CHAT_ID, message)
     logging.info(f'Бот отправил сообщение "{message}"')
 
@@ -41,8 +40,7 @@ def send_message(bot, message: str) -> None:
 def get_api_answer(current_timestamp: int) -> (
         Dict[str, List[Union[int, str]]]
 ):
-    """Функция запроса данных с API, возвращает ответ формата JSON"""
-
+    """Функция запроса данных с API, возвращает ответ формата JSON."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
@@ -55,8 +53,7 @@ def get_api_answer(current_timestamp: int) -> (
 
 
 def check_response(response: dict) -> dict:
-    """Проверка ответа API на корректность """
-
+    """Проверка ответа API на корректность."""
     homeworks = response['homeworks']
     if list(homeworks):
         return homeworks[0]
@@ -65,8 +62,9 @@ def check_response(response: dict) -> dict:
 
 
 def parse_status(homework) -> str:
-    """Функция обрабатывает конкретную домашнюю работу
-     и выдает результат из словаря HOMEWORK_STATUSES """
+    """Функция обрабатывает конкретную домашнюю работу.
+    Выдает результат из словаря HOMEWORK_STATUSES.
+    """
     if 'homework_name' not in homework:
         raise KeyError('homework_name отсутствует в homework')
     homework_name = homework['homework_name']
@@ -76,9 +74,9 @@ def parse_status(homework) -> str:
 
 
 def check_tokens() -> bool:
-    """Функция проверяет доступность переменных окружения,
-     которые необходимы для работы программы. """
-
+    """Функция проверяет доступность переменных окружения.
+    Они необходимы для работы программы.
+    """
     tokens = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
@@ -95,7 +93,6 @@ def check_tokens() -> bool:
 
 def main():
     """Основная логика работы бота."""
-
     if not check_tokens():
         sys.exit('Программа принудительно остановлена')
 
@@ -111,10 +108,8 @@ def main():
                 status = parse_status(updated_homework)
                 send_message(bot, status)
 
-            except Exception as error:
-                logging.debug(
-                    f'Статус домашней работы не обновлен ревьюером'
-                )
+            except Exception:
+                logging.debug('Статус домашней работы не обновлен ревьюером')
 
             current_timestamp = int(time.time())
             time.sleep(RETRY_TIME)
