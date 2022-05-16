@@ -43,22 +43,32 @@ def get_api_answer(current_timestamp: int) -> (
     """Функция запроса данных с API, возвращает ответ формата JSON."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
-    response = requests.get(ENDPOINT, headers=HEADERS, params=params)
-    if response.status_code != 200:
-        raise Exception(f'Эндпоинт {ENDPOINT} не доступен. '
-                        f'Код ответа API: {response.status_code}'
-                        )
-    response = response.json()
-    return response
+    try:
+        response = requests.get(ENDPOINT, headers=HEADERS, params=params)
+    except Exception:
+        logging.error('Некорректный ответ API')
+    else:
+        if response.status_code != 200:
+            raise Exception(
+                f'Эндпоинт {ENDPOINT} не доступен.'
+                f'Код ответа API: {response.status_code}'
+            )
+        response = response.json()
+        return response
 
 
 def check_response(response: dict) -> dict:
+    # Проблема! в тесте передается список с вложеным словарем
+    # а по факту get_api_answer сразу передает словарь без обертки в список =(
     """Проверка ответа API на корректность."""
     homeworks = response['homeworks']
-    if list(homeworks):
-        return homeworks[0]
+    if 'homeworks' not in response:
+        raise KeyError('homeworks отсутствует в response')
     else:
-        return homeworks
+        if list(homeworks):
+            return homeworks[0]
+        else:
+            return homeworks
 
 
 def parse_status(homework) -> str:
@@ -111,7 +121,7 @@ def main():
             except Exception:
                 logging.debug('Статус домашней работы не обновлен ревьюеромs')
 
-            current_timestamp = int(time.time())
+            current_timestamp = response['current_date']
             time.sleep(RETRY_TIME)
 
         except Exception as error:
@@ -119,8 +129,6 @@ def main():
             logging.error(message)
             send_message(bot, message)
             time.sleep(RETRY_TIME)
-        else:
-            ...
 
 
 if __name__ == '__main__':
