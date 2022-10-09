@@ -58,8 +58,6 @@ def get_api_answer(current_timestamp: int) -> (
 
 
 def check_response(response: dict) -> dict:
-    # Проблема! в тесте передается список с вложеным словарем
-    # а по факту get_api_answer сразу передает словарь без обертки в список =(
     """Проверка ответа API на корректность."""
     homeworks = response['homeworks']
     if 'homeworks' not in response:
@@ -117,7 +115,6 @@ def main():
 
                 status = parse_status(updated_homework)
                 send_message(bot, status)
-
             except Exception:
                 logging.debug('Статус домашней работы не обновлен ревьюеромs')
 
